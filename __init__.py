@@ -76,27 +76,44 @@ def enregistrer_client():
     conn.commit()
     conn.close()
     return redirect('/consultation/')  # Rediriger vers la page d'accueil après l'enregistrement
+
+@app.route('/authentification_user', methods=['GET', 'POST'])
+def authentification_user():
+    if request.method == 'POST':
+        if request.form['username'] == 'user' and request.form['password'] == '12345':
+            session['auth_user'] = True
+            return redirect(url_for('fiche_nom_form'))  # redirige vers la recherche
+        else:
+            return render_template('formulaire_authentification.html', error=True)
+
+    return render_template('formulaire_authentification.html', error=False)
+
+@app.route('/fiche_nom/', methods=['GET'])
+def fiche_nom_form():
+    if not est_authentifie_user():
+        return redirect(url_for('authentification_user'))
+
+    return render_template('formulaire_recherche_nom.html')
+
+@app.route('/fiche_nom/', methods=['POST'])
+def fiche_nom_result():
+    if not est_authentifie_user():
+        return redirect(url_for('authentification_user'))
+
+    nom = request.form['nom']
+
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+
+    # Recherche partielle avec LIKE
+    cursor.execute("SELECT * FROM clients WHERE nom LIKE ?", ('%' + nom + '%',))
+    data = cursor.fetchall()
+    conn.close()
+
+    # Réutilise ton template read_data.html (comme /consultation et /fiche_client)
+    return render_template('read_data.html', data=data)
+
                                                                                                                                        
 if __name__ == "__main__":
   app.run(debug=True)
 
-
-@app.route('/fiche_nom')
-def lecture():
-    if not est_authentifie():
-        # Rediriger vers la page d'authentification si l'utilisateur n'est pas authentifié
-        return redirect(url_for('authentificationuser'))
-
-@app.route('/authentificationuser', methods=['GET', 'POST'])
-def authentificationuser():
-    if request.method == 'POST':
-        # Vérifier les identifiants
-        if request.form['username'] == 'user' and request.form['password'] == '12345': # password à cacher par la suite
-            session['authentifie'] = True
-            # Rediriger vers la route lecture après une authentification réussie
-            return redirect(url_for('lecture'))
-        else:
-            # Afficher un message d'erreur si les identifiants sont incorrects
-            return render_template('formulaire_authentification.html', error=True)
-
-    return render_template('formulaire_authentification.html', error=False)
