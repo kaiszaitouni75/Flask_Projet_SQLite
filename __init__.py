@@ -90,14 +90,14 @@ def authentification_user():
 
 @app.route('/fiche_nom/', methods=['GET'])
 def fiche_nom_form():
-    if not est_authentifie_user():
+    if not est_authentifie():
         return redirect(url_for('authentification_user'))
 
     return render_template('formulaire_recherche_nom.html')
 
 @app.route('/fiche_nom/', methods=['POST'])
 def fiche_nom_result():
-    if not est_authentifie_user():
+    if not est_authentifie():
         return redirect(url_for('authentification_user'))
 
     nom = request.form['nom']
