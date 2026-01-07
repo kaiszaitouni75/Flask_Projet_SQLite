@@ -81,26 +81,22 @@ if __name__ == "__main__":
   app.run(debug=True)
 
 
-@app.route('/fiche_nom/', methods=['GET'])
-def fiche_nom():
+@app.route('/fiche_nom')
+def lecture():
+    if not est_authentifie():
+        # Rediriger vers la page d'authentification si l'utilisateur n'est pas authentifié
+        return redirect(url_for('authentificationuser'))
 
-    if not authentification_user():
-        return jsonify({"erreur": "Accès refusé"}), 401
+@app.route('/authentificationuser', methods=['GET', 'POST'])
+def authentificationuser():
+    if request.method == 'POST':
+        # Vérifier les identifiants
+        if request.form['username'] == 'user' and request.form['password'] == '12345': # password à cacher par la suite
+            session['authentifie'] = True
+            # Rediriger vers la route lecture après une authentification réussie
+            return redirect(url_for('lecture'))
+        else:
+            # Afficher un message d'erreur si les identifiants sont incorrects
+            return render_template('formulaire_authentification.html', error=True)
 
-    nom = request.args.get('nom')
-    if not nom:
-        return jsonify({"erreur": "Paramètre 'nom' manquant"}), 400
-
-    conn = sqlite3.connect('database.db')
-    cursor = conn.cursor()
-
-    cursor.execute(
-        "SELECT * FROM clients WHERE nom LIKE ?",
-        ('%' + nom + '%',)
-    )
-
-    resultats = cursor.fetchall()
-    conn.close()
-
-    return jsonify(resultats)
-
+    return render_template('formulaire_authentification.html', error=False)
