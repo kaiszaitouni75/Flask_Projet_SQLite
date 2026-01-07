@@ -4,6 +4,21 @@ from flask import json
 from urllib.request import urlopen
 from werkzeug.utils import secure_filename
 import sqlite3
+from flask import request, Response
+
+USER_LOGIN = "user"
+USER_PASSWORD = "12345"
+
+def require_user_auth():
+    # Vérifie une authentification Basic Auth user/12345.
+    auth = request.authorization
+    if not auth or not (auth.username == USER_LOGIN and auth.password == USER_PASSWORD):
+        return Response(
+            "Accès refusé (auth user requise)",
+            401,
+            {"WWW-Authenticate": 'Basic realm="User Area"'}
+        )
+    return None
 
 app = Flask(__name__)                                                                                                                  
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'  # Clé secrète pour les sessions
@@ -49,7 +64,6 @@ def Readfiche(post_id):
     # Rendre le template HTML et transmettre les données
     return render_template('read_data.html', data=data)
 
-
 @app.route('/consultation/')
 def ReadBDD():
     conn = sqlite3.connect('database.db')
@@ -78,43 +92,41 @@ def enregistrer_client():
     conn.close()
     return redirect('/consultation/')  # Rediriger vers la page d'accueil après l'enregistrement
 
-@app.route('/authentification_user', methods=['GET', 'POST'])
-def authentification_user():
+@app.route('/fiche_nom/', methods=['GET', 'POST'])
+def fiche_nom():
+    # Protection user/12345 (Basic Auth)
+    deny = require_user_auth()
+    if deny:
+        return deny
+
+    # Récupération du nom (POST via formulaire, ou GET via ?nom=)
+    nom = ""
     if request.method == 'POST':
-        if request.form['username'] == 'user' and request.form['password'] == '12345':
-            session['auth_user'] = True
-            return redirect(url_for('fiche_nom_form'))  # redirige vers la recherche
-        else:
-            return render_template('formulaire_authentification.html', error=True)
+        nom = request.form.get('nom', '').strip()
+    else:
+        nom = request.args.get('nom', '').strip()
 
-    return render_template('formulaire_authentification.html', error=False)
+    # Si aucun nom fourni, afficher un petit formulaire
+    if not nom:
+        return """
+        <h2>Recherche client par nom</h2>
+        <form method="POST">
+            <label>Nom :</label>
+            <input name="nom" placeholder="Ex: DUPONT" required>
+            <button type="submit">Rechercher</button>
+        </form>
+        <p>Astuce: tu peux aussi utiliser /fiche_nom/?nom=DUPONT</p>
+        """
 
-@app.route('/fiche_nom/', methods=['GET'])
-def fiche_nom_form():
-    if not est_authentifie():
-        return redirect(url_for('authentification_user'))
-
-    return render_template('formulaire_recherche_nom.html')
-
-@app.route('/fiche_nom/', methods=['POST'])
-def fiche_nom_result():
-    if not est_authentifie():
-        return redirect(url_for('authentification_user'))
-
-    nom = request.form['nom']
-
+    # Recherche en base (LIKE pour accepter recherche partielle)
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
-
-    # Recherche partielle avec LIKE
-    cursor.execute("SELECT * FROM clients WHERE nom LIKE ?", ('%' + nom + '%',))
+    cursor.execute('SELECT * FROM clients WHERE nom LIKE ?', (f"%{nom}%",))
     data = cursor.fetchall()
     conn.close()
 
-    # Réutilise ton template read_data.html (comme /consultation et /fiche_client)
+    # Réutilise ton template existant pour afficher la liste
     return render_template('read_data.html', data=data)
 
-
-                                                                                                                                       
 if __name__ == "__main__":
   app.run(debug=True)
