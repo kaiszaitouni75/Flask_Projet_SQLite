@@ -79,3 +79,24 @@ def enregistrer_client():
                                                                                                                                        
 if __name__ == "__main__":
   app.run(debug=True)
+
+
+@app.route('/fiche_nom/', methods=['GET'])
+def fiche_nom():
+    nom = request.args.get('nom')
+
+    if not nom:
+        return jsonify({"erreur": "Paramètre 'nom' manquant"}), 400
+
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "SELECT * FROM clients WHERE nom LIKE ?",
+        ('%' + nom + '%',)
+    )
+
+    resultats = cursor.fetchall()
+    conn.close()
+
+    return jsonify(resultats)
