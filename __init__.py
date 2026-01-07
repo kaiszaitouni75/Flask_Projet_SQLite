@@ -83,8 +83,11 @@ if __name__ == "__main__":
 
 @app.route('/fiche_nom/', methods=['GET'])
 def fiche_nom():
-    nom = request.args.get('nom')
 
+    if not authentification_user():
+        return jsonify({"erreur": "Accès refusé"}), 401
+
+    nom = request.args.get('nom')
     if not nom:
         return jsonify({"erreur": "Paramètre 'nom' manquant"}), 400
 
@@ -100,3 +103,4 @@ def fiche_nom():
     conn.close()
 
     return jsonify(resultats)
+
