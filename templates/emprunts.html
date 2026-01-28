@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Mes emprunts</title>
+</head>
+<body>
+
+<nav>
+    <a href="{{ url_for('hello_world') }}">Accueil</a> |
+    <a href="{{ url_for('liste_livres') }}">Livres</a>
+</nav>
+
+<h1>Mes livres empruntés</h1>
+
+<table border="1">
+    <tr>
+        <th>Livre</th>
+        <th>Date d'emprunt</th>
+        <th>Statut</th>
+    </tr>
+
+    {% for e in emprunts %}
+    <tr>
+        <td>{{ e[1] }}</td> <!-- titre -->
+        <td>{{ e[2] }}</td> <!-- date emprunt -->
+        <td>
+            {% if e[3] %}
+                Retourné le {{ e[3] }}
+            {% else %}
+                <form action="{{ url_for('retourner_livre', livre_id=e[0]) }}" method="POST">
+                    <button type="submit">Retourner</button>
+                </form>
+            {% endif %}
+        </td>
+    </tr>
+    {% else %}
+    <tr>
+        <td colspan="3">Aucun emprunt</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<p><a href="{{ url_for('liste_livres') }}">← Retour à la liste des livres</a></p>
+
+</body>
+</html>
