@@ -1,18 +1,30 @@
-<h2>Liste des tâches</h2>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Liste des tâches</title>
+</head>
+<body>
+    <h1>Liste des tâches</h1>
 
-{% for task in tasks %}
-    <div>
-        <strong>{{ task[1] }}</strong> - {{ task[2] }}
-        <br>
-        Date : {{ task[3] }}
+    {% for task in tasks %}
+        <div>
+            <strong>{{ task[1] }}</strong><br>
+            {{ task[2] }}<br>
+            📅 Échéance : {{ task[3] }}<br>
 
-        {% if task[4] == 0 %}
-            <a href="/terminer/{{ task[0] }}">✅ Terminer</a>
-        {% else %}
-            ✔ Terminée
-        {% endif %}
+            {% if task[4] == 0 %}
+                <a href="/taches/terminer/{{ task[0] }}">✅ Terminer</a>
+            {% else %}
+                ✔ Terminée
+            {% endif %}
 
-        <a href="/supprimer/{{ task[0] }}">❌ Supprimer</a>
-    </div>
-    <hr>
-{% endfor %}
+            <a href="/taches/supprimer/{{ task[0] }}">❌ Supprimer</a>
+        </div>
+        <hr>
+    {% endfor %}
+
+    <br><a href="/taches/ajouter">Ajouter une nouvelle tâche</a>
+    <br><a href="/">Retour accueil</a>
+</body>
+</html>
