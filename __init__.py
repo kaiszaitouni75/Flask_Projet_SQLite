@@ -209,6 +209,28 @@ def home():
     return render_template("hello.html")
 
 
+@app.route("/ajouter_tache", methods=["GET", "POST"])
+def ajouter_tache():
+    if request.method == "POST":
+        title = request.form["title"]
+        description = request.form["description"]
+        due_date = request.form["due_date"]
+
+        conn = sqlite3.connect("database.db")
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO tasks (title, description, due_date) VALUES (?, ?, ?)",
+            (title, description, due_date)
+        )
+        conn.commit()
+        conn.close()
+
+        return redirect("/taches")
+
+    return render_template("ajouter_tache.html")
+
+
+
 # --------------------------
 # Lancer l'application
 # --------------------------
