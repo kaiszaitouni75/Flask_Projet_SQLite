@@ -1,0 +1,18 @@
+<h2>Liste des tâches</h2>
+
+{% for task in tasks %}
+    <div>
+        <strong>{{ task[1] }}</strong> - {{ task[2] }}
+        <br>
+        Date : {{ task[3] }}
+
+        {% if task[4] == 0 %}
+            <a href="/terminer/{{ task[0] }}">✅ Terminer</a>
+        {% else %}
+            ✔ Terminée
+        {% endif %}
+
+        <a href="/supprimer/{{ task[0] }}">❌ Supprimer</a>
+    </div>
+    <hr>
+{% endfor %}
