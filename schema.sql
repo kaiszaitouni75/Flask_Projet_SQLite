@@ -44,7 +44,19 @@ CREATE TABLE emprunts (
     livre_id INTEGER NOT NULL,
     date_emprunt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     date_retour TIMESTAMP,
-
     FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY(livre_id) REFERENCES livres(id) ON DELETE CASCADE
+);
+
+-- =========================
+-- TABLE TASKS
+-- =========================
+DROP TABLE IF EXISTS tasks;
+
+CREATE TABLE tasks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    description TEXT NOT NULL,
+    due_date TEXT,
+    completed INTEGER DEFAULT 0
 );
