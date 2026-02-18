@@ -229,6 +229,38 @@ def ajouter_tache():
 
     return render_template("ajouter_tache.html")
 
+@app.route("/taches")
+def taches():
+    conn = sqlite3.connect("database.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM tasks")
+    tasks = cursor.fetchall()
+    conn.close()
+
+    return render_template("taches.html", tasks=tasks)
+
+
+@app.route("/supprimer/<int:id>")
+def supprimer(id):
+    conn = sqlite3.connect("database.db")
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM tasks WHERE id = ?", (id,))
+    conn.commit()
+    conn.close()
+
+    return redirect("/taches")
+
+
+@app.route("/terminer/<int:id>")
+def terminer(id):
+    conn = sqlite3.connect("database.db")
+    cursor = conn.cursor()
+    cursor.execute("UPDATE tasks SET completed = 1 WHERE id = ?", (id,))
+    conn.commit()
+    conn.close()
+
+    return redirect("/taches")
+
 
 
 # --------------------------
