@@ -204,6 +204,11 @@ def ajouter_user():
     return render_template('ajouter_user.html')
 
 
+@app.route("/")
+def home():
+    return render_template("hello.html")
+
+
 # --------------------------
 # Lancer l'application
 # --------------------------
